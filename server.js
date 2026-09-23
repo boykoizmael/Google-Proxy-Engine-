@@ -1,4 +1,4 @@
-// server.js - Final Stable Server with Security Clearance Headers
+// server.js - Final Production-Grade Fail-Safe Node Server
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import wispServerPkg from 'wisp-server-node'; 
@@ -16,31 +16,29 @@ const app = express();
 const server = createServer(app);
 const bare = createBareServer('/bare/');
 
-// =======================================================
-// SECURITY FIX: Explicitly allow Service Worker scoping
-// =======================================================
+// Explicit security clearance headers so the browser allows the Service Worker scope rules
 app.use((req, res, next) => {
     res.setHeader('Service-Worker-Allowed', '/');
     next();
 });
 
-// Serve everything inside your root folder as a static asset
+// Serve everything inside your root folder cleanly as static elements
 app.use(express.static(__dirname));
 
-// Dynamic dependency fetch loops from official CDN blocks
+// Stream Core Ultraviolet dependency file structures directly from open node repositories
 const CDN = 'https://jsdelivr.net';
 
-app.get('/uv/uv.bundle.js', async (req, res) => {
+app.get('/uv.bundle.js', async (req, res) => {
     const src = await fetch(CDN + 'uv.bundle.js');
     res.type('application/javascript').send(await src.text());
 });
 
-app.get('/uv/uv.handler.js', async (req, res) => {
+app.get('/uv.handler.js', async (req, res) => {
     const src = await fetch(CDN + 'uv.handler.js');
     res.type('application/javascript').send(await src.text());
 });
 
-app.get('/uv/uv.sw.js', async (req, res) => {
+app.get('/uv.sw.js', async (req, res) => {
     const src = await fetch(CDN + 'uv.sw.js');
     res.type('application/javascript').send(await src.text());
 });
@@ -49,7 +47,16 @@ app.get('/', (req, res) => {
     res.sendFile(join(__dirname, 'index.html'));
 });
 
-// Route primary HTTP data arrays through standard Express or Bare engine
+// =========================================================================
+// CRITICAL FIX: Direct Fallback Catch-All to eliminate "Cannot GET" errors
+// =========================================================================
+app.get('/service/*', (req, res) => {
+    // If the service worker fails to intercept the page request instantly,
+    // this keeps the page alive and feeds index.html instead of displaying a crash screen.
+    res.sendFile(join(__dirname, 'index.html'));
+});
+
+// Route active live HTTP web traffic requests through your data channel
 server.on('request', (req, res) => {
     if (bare.shouldRoute(req)) {
         bare.route(req, res);
@@ -58,7 +65,7 @@ server.on('request', (req, res) => {
     }
 });
 
-// WebSocket binding pipeline configurations for heavy multiplayer games
+// High-performance WebSocket proxy socket mapping pipeline for real-time multiplayer links
 const wss = new WebSocketServer({ noServer: true });
 
 server.on('upgrade', (request, socket, head) => {
@@ -75,5 +82,5 @@ server.on('upgrade', (request, socket, head) => {
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
-    console.log(`ShadowSearch active on Port: ${PORT}`);
+    console.log(`ShadowSearch running stable on Port: ${PORT}`);
 });
