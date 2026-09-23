@@ -66,6 +66,15 @@
     <iframe class="view-window" id="proxy-viewport" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
 
     <script>
+        // Helper function to encode strings cleanly to Hex format
+        function stringToHex(str) {
+            let hex = '';
+            for (let i = 0; i < str.length; i++) {
+                hex += str.charCodeAt(i).toString(16).padStart(2, '0');
+            }
+            return hex;
+        }
+
         function handleSearch() {
             const input = document.getElementById('omni-bar').value.trim();
             if (!input) return;
@@ -82,11 +91,11 @@
             document.getElementById('intro-screen').classList.add('hidden');
             const viewport = document.getElementById('proxy-viewport');
             
-            // Safe Base64 mapping conversion layout string encoding
-            const base64Encoded = btoa(unescape(encodeURIComponent(targetUrl))).replace(/\//g, '_');
+            // Encode the link using the safe Hex engine mapping
+            const hexEncoded = stringToHex(targetUrl);
             
-            // Route perfectly using the trailing endpoint path parameters block
-            viewport.src = window.location.origin + '/service/' + base64Encoded;
+            // Route perfectly through the wildcard endpoint
+            viewport.src = window.location.origin + '/service/' + hexEncoded;
         }
 
         function goHome() {
