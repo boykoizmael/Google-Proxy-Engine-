@@ -29,6 +29,14 @@ app.get('/uv.handler.js', async (req, res) => {
     res.type('application/javascript').send(await src.text());
 });
 
+// ==========================================================
+// FIXED: Catch-All Proxy Router to resolve "Cannot GET /service/"
+// ==========================================================
+app.get('/service/*', (req, res) => {
+    // Allows Ultraviolet to process the request context dynamically in the browser
+    res.sendFile(join(__dirname, 'index.html'));
+});
+
 app.get('/', (req, res) => {
     res.sendFile(join(__dirname, 'index.html'));
 });
