@@ -45,7 +45,7 @@
         .intro-box { text-align: center; max-width: 500px; padding: 20px; }
         .intro-box h1 { font-size: 2.5rem; margin-bottom: 10px; color: #fff; }
     </style>
-    <!-- Load official Ultraviolet bundling scripts to fix heavy sites like arras.io -->
+    <!-- Load local unblocking rewriter configurations -->
     <script src="/uv.bundle.js"></script>
     <script src="/uv.config.js"></script>
 </head>
@@ -66,21 +66,21 @@
         </div>
     </div>
 
-    <iframe class="view-window" id="proxy-viewport" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
+    <iframe class="view-window" id="proxy-viewport"></iframe>
 
     <script>
-        // Automatically initialize Ultraviolet when the window wakes up
-        window.addEventListener('load', async () => {
+        // Start the browser tracking worker matched perfectly to the configuration path
+        async function registerEngineWorker() {
             if ('serviceWorker' in navigator) {
                 try {
-                    // Force registration onto the root scope path to ensure total alignment
-                    await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+                    // FIXED: Scope updated to align directly with your uv.config prefix module 
+                    await navigator.serviceWorker.register('/sw.js', { scope: __uv$config.prefix });
                     console.log('Proxy connection engine active.');
                 } catch (err) {
                     console.error('Service worker initialization failure:', err);
                 }
             }
-        });
+        }
 
         function handleSearch() {
             const input = document.getElementById('omni-bar').value.trim();
@@ -98,7 +98,7 @@
             document.getElementById('intro-screen').classList.add('hidden');
             const viewport = document.getElementById('proxy-viewport');
             
-            // Route target through the Ultraviolet auto-rewriter path
+            // Map configuration routing variables explicitly
             viewport.src = window.location.origin + __uv$config.prefix + __uv$config.encodeUrl(targetUrl);
         }
 
@@ -111,6 +111,9 @@
         document.getElementById('omni-bar').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleSearch();
         });
+
+        // Initialize runtime script operations
+        registerEngineWorker();
     </script>
 </body>
 </html>
