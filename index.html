@@ -22,12 +22,8 @@
             padding: 10px 20px; display: flex; align-items: center;
             border-bottom: 1px solid #30363d; gap: 15px; z-index: 10;
         }
-        .logo {
-            font-weight: bold; color: var(--accent-color); font-size: 1.2rem; cursor: pointer;
-        }
-        .search-container {
-            flex-grow: 1; display: flex; position: relative;
-        }
+        .logo { font-weight: bold; color: var(--accent-color); font-size: 1.2rem; cursor: pointer; }
+        .search-container { flex-grow: 1; display: flex; position: relative; }
         input[type="text"] {
             width: 100%; padding: 10px 15px; background-color: var(--bg-color);
             border: 1px solid #30363d; border-radius: 6px; color: #fff; font-size: 0.95rem;
@@ -39,9 +35,7 @@
             border: none; border-radius: 6px; margin-left: 10px; cursor: pointer; font-weight: 600;
         }
         button:hover { opacity: 0.9; }
-        .view-window {
-            flex-grow: 1; width: 100%; border: none; background: #fff;
-        }
+        .view-window { flex-grow: 1; width: 100%; border: none; background: #fff; }
         .intro-screen {
             position: absolute; top: 56px; left: 0; width: 100%; height: calc(100% - 56px);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -62,7 +56,6 @@
         </div>
     </header>
 
-    <!-- Splash homepage inside the search engine -->
     <div class="intro-screen" id="intro-screen">
         <div class="intro-box">
             <h1>ShadowSearch</h1>
@@ -70,7 +63,6 @@
         </div>
     </div>
 
-    <!-- The isolated viewing pipeline container -->
     <iframe class="view-window" id="proxy-viewport" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
 
     <script>
@@ -79,27 +71,21 @@
             if (!input) return;
 
             let targetUrl = input;
-            
-            // Clean pattern check to determine if the user provided an address or query
             const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i;
 
             if (!urlPattern.test(input)) {
-                // If it is a query phrase, properly append to the privacy search scraper structure
                 targetUrl = "https://duckduckgo.com" + encodeURIComponent(input);
             } else if (!/^https?:\/\//i.test(input)) {
-                // Prepend protocol if user omitted it
                 targetUrl = 'https://' + input;
             }
 
-            // Hide the splash welcome interface layout
             document.getElementById('intro-screen').classList.add('hidden');
-
             const viewport = document.getElementById('proxy-viewport');
             
-            // Cleanly encode to Base64 and swap slashes to run reliably over the express service endpoint
+            // Safe Base64 mapping conversion layout string encoding
             const base64Encoded = btoa(unescape(encodeURIComponent(targetUrl))).replace(/\//g, '_');
             
-            // Route request completely inside the sandbox
+            // Route perfectly using the trailing endpoint path parameters block
             viewport.src = window.location.origin + '/service/' + base64Encoded;
         }
 
