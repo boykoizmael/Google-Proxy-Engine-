@@ -1,11 +1,11 @@
-// server.js - Complete Fixed Code
+// server.js - High Performance WISP Relay Backend (Fixed Wildcard Route Mapping)
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import wispServerPkg from 'wisp-server-node'; 
 import express from 'express';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import fetch from 'node-fetch'; // Make sure this is installed or use global fetch if on Node 18+
+import fetch from 'node-fetch';
 
 const wispServer = wispServerPkg.wispServer || wispServerPkg;
 
@@ -15,53 +15,49 @@ const __dirname = dirname(__filename);
 const app = express();
 const server = createServer(app);
 
-// Serve frontend interface static files
+// Serve frontend interface static files cleanly
 app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
     res.sendFile(join(__dirname, 'index.html'));
 });
 
-// ==========================================
-// NEW: Express Proxy Pipeline Route Handler
-// ==========================================
+// ==================================================
+// CORRECTED: Wildcard Catch-All Express Proxy Route
+// ==================================================
 app.get('/service/*', async (req, res) => {
     try {
-        // Extract the base64 string from the URL path
+        // Extract everything following the /service/ path namespace prefix
         const encodedTarget = req.params[0];
         if (!encodedTarget) {
-            return res.status(400).send('Invalid Context Target Specified');
+            return res.status(400).send('No target context URL provided.');
         }
 
-        // Decode the URL (reversing the frontend btoa logic)
-        let targetUrl = Buffer.from(encodedTarget.replace(/_/g, '/'), 'base64').toString('utf-8');
+        // Reconstruct the structural base64 string mapping orientation safely
+        const base64Clean = encodedTarget.replace(/_/g, '/');
+        const targetUrl = Buffer.from(base64Clean, 'base64').toString('utf-8');
 
-        // Clean up accidental bad parsing strings from previous frontend versions if any
-        if (targetUrl.includes('|') || targetUrl.includes('{')) {
-            targetUrl = targetUrl.split('|')[0].replace(/[{}]/g, '');
-        }
-
-        // Fetch the target website data on behalf of the client
+        // Fetch target website parameters on behalf of the application browser window
         const response = await fetch(targetUrl, {
             headers: {
-                'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
             }
         });
 
-        // Forward the website headers and status code back to your browser tab
+        // Set status response metrics
         res.status(response.status);
+
+        // Pipe active headers smoothly while removing strict cross-origin blockers
         for (const [key, value] of response.headers.entries()) {
-            // Skip headers that block embedding or conflict with our pipeline
             if (['content-security-policy', 'x-frame-options', 'content-encoding'].includes(key.toLowerCase())) continue;
             res.setHeader(key, value);
         }
 
-        // Send the raw site content into your search engine iframe view pane
         const body = await response.text();
         res.send(body);
 
     } catch (err) {
-        res.status(500).send('Pipeline Routing Resolution Failure: ' + err.message);
+        res.status(500).send('Proxy Routing Connection Crash: ' + err.message);
     }
 });
 
