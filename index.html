@@ -45,9 +45,8 @@
         .intro-box { text-align: center; max-width: 500px; padding: 20px; }
         .intro-box h1 { font-size: 2.5rem; margin-bottom: 10px; color: #fff; }
     </style>
-    <!-- Load required local rewriter configurations safely -->
-    <script src="/uv.bundle.js"></script>
-    <script src="/uv.config.js"></script>
+    <script src="/uv/uv.bundle.js"></script>
+    <script src="/uv/uv.config.js"></script>
 </head>
 <body>
 
@@ -62,21 +61,20 @@
     <div class="intro-screen" id="intro-screen">
         <div class="intro-box">
             <h1>ShadowSearch</h1>
-            <p>Everything runs inside. Unrestricted, fast, and completely isolated via custom network mapping.</p>
+            <p>Everything runs inside. Unrestricted, fast, and completely isolated via local engine mapping.</p>
         </div>
     </div>
 
     <iframe class="view-window" id="proxy-viewport"></iframe>
 
     <script>
-        // Start the browser tracking worker using local properties configuration templates
-        async function registerEngineWorker() {
+        async function initProxyEngine() {
             if ('serviceWorker' in navigator) {
                 try {
                     await navigator.serviceWorker.register('/sw.js', { scope: __uv$config.prefix });
-                    console.log('Proxy connection engine active.');
+                    console.log('Gateway communication synced.');
                 } catch (err) {
-                    console.error('Service worker initialization failure:', err);
+                    console.error('Core component alignment failed:', err);
                 }
             }
         }
@@ -97,7 +95,6 @@
             document.getElementById('intro-screen').classList.add('hidden');
             const viewport = document.getElementById('proxy-viewport');
             
-            // Map configuration routing variables explicitly
             viewport.src = window.location.origin + __uv$config.prefix + __uv$config.encodeUrl(targetUrl);
         }
 
@@ -111,8 +108,7 @@
             if (e.key === 'Enter') handleSearch();
         });
 
-        // Initialize runtime script operations
-        registerEngineWorker();
+        initProxyEngine();
     </script>
 </body>
 </html>
