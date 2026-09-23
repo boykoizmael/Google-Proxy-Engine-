@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#111827">
+  <title>1117 Search</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./">1117</a>
+    <button id="menuButton" class="menu-button" aria-label="Menu" aria-expanded="false">☰</button>
+    <div id="menu" class="menu hidden">
+      <button data-mode="search">🔎 Web Search</button>
+      <button data-mode="website">🌐 Open Website</button>
+      <button data-mode="weather">🌤️ Weather</button>
+      <button data-mode="calculator">🧮 Calculator</button>
+      <button data-mode="home">🏠 Home</button>
+    </div>
+  </header>
+
+  <main id="homeView" class="home">
+    <section class="hero">
+      <div class="logo">1117</div>
+      <p class="tagline">Search the web. Stay in 1117.</p>
+
+      <form id="searchForm" class="searchbar">
+        <select id="modeSelect" aria-label="Mode">
+          <option value="search">Web</option>
+          <option value="website">Website</option>
+          <option value="weather">Weather</option>
+          <option value="calculator">Calc</option>
+        </select>
+        <input id="queryInput" placeholder="Search or enter a website URL" autocomplete="off" spellcheck="false">
+        <button type="submit">Search</button>
+      </form>
+
+      <div class="chips">
+        <button data-fill="hi">Say hi</button>
+        <button data-fill="weather Seattle">Weather</button>
+        <button data-fill="2 + 2 * 10">Calculator</button>
+        <button data-fill="https://example.com">Open Website</button>
+      </div>
+
+      <p class="hint">
+        1117 searches without a browser redirect and can display supported websites inside the viewer.
+      </p>
+    </section>
+  </main>
+
+  <main id="resultsView" class="hidden results-page">
+    <div class="results-toolbar">
+      <button id="backHome" class="small">← Home</button>
+      <form id="resultsSearchForm" class="results-search">
+        <select id="resultsMode">
+          <option value="search">Web</option>
+          <option value="website">Website</option>
+          <option value="weather">Weather</option>
+          <option value="calculator">Calc</option>
+        </select>
+        <input id="resultsQuery" autocomplete="off" spellcheck="false">
+        <button type="submit">Search</button>
+      </form>
+    </div>
+    <div id="status" class="status"></div>
+    <div id="resultsList"></div>
+  </main>
+
+  <main id="browserView" class="hidden browser-page">
+    <div class="browser-toolbar">
+      <button id="browserBack" class="small">←</button>
+      <button id="browserForward" class="small">→</button>
+      <button id="browserReload" class="small">↻</button>
+      <form id="urlForm" class="urlbar">
+        <input id="urlInput" placeholder="https://example.com" autocomplete="off" spellcheck="false">
+        <button type="submit">Go</button>
+      </form>
+    </div>
+    <div id="frameNotice" class="notice hidden"></div>
+    <iframe id="siteFrame" title="1117 Website Viewer"
+      sandbox="allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-presentation allow-scripts"
+      referrerpolicy="no-referrer"></iframe>
+  </main>
+
+  <footer>1117 Search</footer>
+  <script src="./config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
