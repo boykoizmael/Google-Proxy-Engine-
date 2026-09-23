@@ -1,4 +1,4 @@
-// server.js - Stable Traffic Pipeline Backend with File Routers
+// server.js - Final Production-Grade Native Proxy Server
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import wispServerPkg from 'wisp-server-node'; 
@@ -16,11 +16,16 @@ const app = express();
 const server = createServer(app);
 const bare = createBareServer('/bare/');
 
+// Set explicit security clearance headers so the browser allows the Service Worker to run
+app.use((req, res, next) => {
+    res.setHeader('Service-Worker-Allowed', '/');
+    next();
+});
+
+// Serve everything inside your root folder as a direct static path asset
 app.use(express.static(__dirname));
 
-// ==================================================
-// Local Core Script Compilers
-// ==================================================
+// Dynamic dependency fetch loops
 const CDN = 'https://jsdelivr.net';
 
 app.get('/uv/uv.bundle.js', async (req, res) => {
@@ -38,12 +43,21 @@ app.get('/uv/uv.sw.js', async (req, res) => {
     res.type('application/javascript').send(await src.text());
 });
 
-// FIXED: Serve index.html statically on root
+// REMOVED THE EMBEDDED /service/* ROUTE THAT WAS CAUSING THE "CANNOT GET" BLOCKS
+// Instead, if a user reloads a proxy page directly, it routes them smoothly back to the app frame
+app.use((req, res, next) => {
+    if (req.path.startsWith('/service/')) {
+        res.sendFile(join(__dirname, 'index.html'));
+    } else {
+        next();
+    }
+});
+
 app.get('/', (req, res) => {
     res.sendFile(join(__dirname, 'index.html'));
 });
 
-// Route network requests through either standard HTTP routing loops or the private Bare engine
+// Route primary HTTP data arrays
 server.on('request', (req, res) => {
     if (bare.shouldRoute(req)) {
         bare.route(req, res);
@@ -52,7 +66,7 @@ server.on('request', (req, res) => {
     }
 });
 
-// Configure the high-performance WebSocket proxy socket mapping pipeline for game streams
+// WebSocket binding pipeline configurations for heavy multiplayer data games
 const wss = new WebSocketServer({ noServer: true });
 
 server.on('upgrade', (request, socket, head) => {
@@ -69,5 +83,5 @@ server.on('upgrade', (request, socket, head) => {
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
-    console.log(`ShadowSearch Proxy engine online on Port: ${PORT}`);
+    console.log(`ShadowSearch active on Port: ${PORT}`);
 });
