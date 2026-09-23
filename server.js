@@ -25,6 +25,33 @@ app.use((req, res, next) => {
 // Serve everything inside your root folder cleanly as static elements
 app.use(express.static(__dirname));
 
+// =========================================================================
+// THE FINAL PLUG: Serves a blank script loader instead of duplicating index.html
+// =========================================================================
+app.get('/service/*', (req, res) => {
+    // If the browser hits this before the service worker wakes up, this sends a blank canvas 
+    // that forces the proxy worker to register and instantly reloads the page into the proxy.
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <script src="/uv.bundle.js"></script>
+            <script src="/uv.config.js"></script>
+            <script>
+                async function activateEngine() {
+                    if ('serviceWorker' in navigator) {
+                        await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+                        window.location.reload();
+                    }
+                }
+                activateEngine();
+            </script>
+        </head>
+        <body style="background:#0d1117;"></body>
+        </html>
+    `);
+});
+
 app.get('/', (req, res) => {
     res.sendFile(join(__dirname, 'index.html'));
 });
