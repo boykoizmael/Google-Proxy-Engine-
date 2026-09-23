@@ -66,58 +66,41 @@
     <div class="intro-screen" id="intro-screen">
         <div class="intro-box">
             <h1>ShadowSearch</h1>
-            <p>Everything runs inside. Unrestricted, fast, and completely isolated via custom WISP mapping.</p>
+            <p>Everything runs inside. Unrestricted, fast, and completely isolated via custom network mapping.</p>
         </div>
     </div>
 
     <!-- The isolated viewing pipeline container -->
     <iframe class="view-window" id="proxy-viewport" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
 
-    <!-- Ephemeral client routing logic -->
     <script>
-        // REPLACE WITH YOUR DEPLOYED BACKEND RELAY URL
-        const WISP_RELAY_URL = "wss://your-custom-relay-app.koyeb.app/wisp/"; 
-
-        async function initProxyEngine() {
-            if ('serviceWorker' in navigator) {
-                try {
-                    // Registering the background hook configuration mapping
-                    const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-                    console.log('Proxy routing engine active:', registration.scope);
-                    
-                    // Propagate the backend WISP relay parameters to the configuration worker
-                    if (navigator.serviceWorker.controller) {
-                        navigator.serviceWorker.controller.postMessage({
-                            type: 'SET_RELAY',
-                            url: WISP_RELAY_URL
-                        });
-                    }
-                } catch (err) {
-                    console.error('Engine initialization failed:', err);
-                }
-            }
-        }
-
         function handleSearch() {
             const input = document.getElementById('omni-bar').value.trim();
             if (!input) return;
 
             let targetUrl = input;
-            const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\$/;
+            
+            // Clean pattern check to determine if the user provided an address or query
+            const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i;
 
-            // If the query is not a direct URL, compile an anonymous search request
             if (!urlPattern.test(input)) {
-                targetUrl = `https://duckduckgo.com{encodeURIComponent(input)}`;
+                // If it is a query phrase, properly append to the privacy search scraper structure
+                targetUrl = "https://duckduckgo.com" + encodeURIComponent(input);
             } else if (!/^https?:\/\//i.test(input)) {
+                // Prepend protocol if user omitted it
                 targetUrl = 'https://' + input;
             }
 
-            // Collapse the home screen overlay
+            // Hide the splash welcome interface layout
             document.getElementById('intro-screen').classList.add('hidden');
 
-            // Route the targeted request directly inside the processing pipeline prefix
             const viewport = document.getElementById('proxy-viewport');
-            viewport.src = window.location.origin + '/service/' + btoa(targetUrl).replace(/\//g, '_');
+            
+            // Cleanly encode to Base64 and swap slashes to run reliably over the express service endpoint
+            const base64Encoded = btoa(unescape(encodeURIComponent(targetUrl))).replace(/\//g, '_');
+            
+            // Route request completely inside the sandbox
+            viewport.src = window.location.origin + '/service/' + base64Encoded;
         }
 
         function goHome() {
@@ -129,8 +112,6 @@
         document.getElementById('omni-bar').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleSearch();
         });
-
-        window.addEventListener('load', initProxyEngine);
     </script>
 </body>
 </html>
