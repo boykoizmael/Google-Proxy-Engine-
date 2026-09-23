@@ -3,180 +3,143 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>1117 Search</title>
-  
-  <!-- 1. Load Fuse.js for powerful client-side search algorithms -->
-  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
-  
+  <title>1117 Browser</title>
   <style>
-    /* 2. Style the 1117 Search Engine */
-    :root {
-      --bg: #ffffff;
-      --text: #202124;
-      --primary: #1a73e8;
-      --border: #dfe1e5;
-    }
-    body {
+    /* Reset margins so the app takes up the whole screen */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
+      background-color: #f1f3f4;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      padding-top: 15vh;
-      margin: 0;
     }
+
+    /* The Top Navigation Bar */
+    #top-bar {
+      background-color: #ffffff;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      z-index: 10;
+    }
+
     .brand {
-      font-size: 5rem;
+      font-size: 1.5rem;
       font-weight: 800;
-      letter-spacing: -3px;
-      margin-bottom: 30px;
+      letter-spacing: -1px;
+      margin-right: 20px;
     }
     .brand span:nth-child(1) { color: #4285f4; }
     .brand span:nth-child(2) { color: #ea4335; }
     .brand span:nth-child(3) { color: #fbbc05; }
     .brand span:nth-child(4) { color: #34a853; }
-    
+
+    /* The Search/URL Box */
     .search-container {
-      width: 100%;
-      max-width: 584px;
-      padding: 0 20px;
-      box-sizing: border-box;
+      flex-grow: 1;
+      max-width: 800px;
+      display: flex;
     }
-    .search-box {
+    
+    #searchInput {
       width: 100%;
-      padding: 14px 24px;
-      font-size: 1.1rem;
-      border: 1px solid var(--border);
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: 1px solid #dfe1e5;
       border-radius: 24px;
       outline: none;
-      box-shadow: 0 1px 6px rgba(32,33,36,0.1);
-      transition: box-shadow 0.2s, border 0.2s;
-    }
-    .search-box:focus {
-      box-shadow: 0 1px 8px rgba(32,33,36,0.2);
-      border-color: rgba(223,225,229,0);
+      box-shadow: 0 1px 4px rgba(32,33,36,0.05);
+      transition: box-shadow 0.2s;
     }
     
-    #results {
-      margin-top: 40px;
+    #searchInput:focus {
+      box-shadow: 0 1px 6px rgba(32,33,36,0.15);
+    }
+
+    /* The Iframe Viewer (Where websites load) */
+    #viewer {
+      flex-grow: 1;
       width: 100%;
-      max-width: 650px;
-      padding: 0 20px;
-      box-sizing: border-box;
+      border: none;
+      background-color: #ffffff;
     }
-    .result-item {
-      margin-bottom: 25px;
-    }
-    .result-title {
-      color: var(--primary);
-      font-size: 1.25rem;
-      text-decoration: none;
-      display: block;
-      margin-bottom: 3px;
-    }
-    .result-title:hover {
-      text-decoration: underline;
-    }
-    .result-url {
-      color: #202124;
-      font-size: 0.85rem;
-      margin-bottom: 4px;
-    }
-    .result-desc {
+
+    /* Loading indicator */
+    #loading {
+      display: none;
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 0 0 8px 8px;
       font-size: 0.9rem;
-      color: #4d5156;
-      line-height: 1.58;
-    }
-    .no-results {
-      color: #5f6368;
-      font-style: italic;
     }
   </style>
 </head>
 <body>
 
-  <!-- The 1117 Logo -->
-  <div class="brand">
-    <span>1</span><span>1</span><span>1</span><span>7</span>
-  </div>
-  
-  <!-- The Search Input Box -->
-  <div class="search-container">
-    <input type="text" id="searchInput" class="search-box" placeholder="Search the 1117 database..." autocomplete="off">
+  <!-- The Top Bar -->
+  <div id="top-bar">
+    <div class="brand">
+      <span>1</span><span>1</span><span>1</span><span>7</span>
+    </div>
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="Enter a URL (e.g., wikipedia.org) or search term..." autocomplete="off">
+    </div>
   </div>
 
-  <!-- Where results will appear -->
-  <div id="results"></div>
+  <div id="loading">Loading proxy...</div>
+
+  <!-- The Window where websites will load -->
+  <iframe id="viewer" src="about:blank"></iframe>
 
   <script>
-    // 3. Define the Database (Your Index)
-    // You can add as many items here as you want.
-    const database = [
-      {
-        title: "How to Build a Client-Side Search Engine",
-        url: "https://1117.local/guides/client-search",
-        description: "Learn how to use JavaScript and JSON to create an in-browser search engine that requires no backend database."
-      },
-      {
-        title: "History of 1117",
-        url: "https://1117.local/about",
-        description: "The 1117 search engine was created as a fully contained, lightning-fast tool for looking up local data."
-      },
-      {
-        title: "JavaScript Variables and Functions",
-        url: "https://1117.local/code/js",
-        description: "A deep dive into declaring variables, writing functions, and manipulating the DOM to build interactive web apps."
-      },
-      {
-        title: "Designing Search Interfaces",
-        url: "https://1117.local/design/ui",
-        description: "Best practices for spacing, typography, and shadow effects when building a clean search engine homepage."
-      }
-    ];
-
-    // 4. Configure the Search Engine Logic
-    const fuseOptions = {
-      keys: ['title', 'description'], // Tell the engine to look in both titles and descriptions
-      includeScore: true,             // Rank the best matches at the top
-      threshold: 0.3                  // Fuzziness level: 0.0 requires an exact match, 1.0 matches anything
-    };
-    
-    // Initialize the engine with your database
-    const engine = new Fuse(database, fuseOptions);
-
-    // 5. Connect the User Interface to the Engine
     const searchInput = document.getElementById('searchInput');
-    const resultsContainer = document.getElementById('results');
+    const viewer = document.getElementById('viewer');
+    const loading = document.getElementById('loading');
 
-    searchInput.addEventListener('input', function(e) {
-      const query = e.target.value;
-      
-      // If the search bar is empty, clear the results
-      if (query.trim() === '') {
-        resultsContainer.innerHTML = '';
-        return;
-      }
+    // Listen for the "Enter" key
+    searchInput.addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        let query = searchInput.value.trim();
+        if (!query) return;
 
-      // Ask the engine to find matches
-      const results = engine.search(query);
-      
-      // Render the results to the page
-      if (results.length === 0) {
-        resultsContainer.innerHTML = '<div class="no-results">Your search did not match any documents in 1117.</div>';
-      } else {
-        resultsContainer.innerHTML = results.map(result => {
-          const item = result.item; // Extract the matched data
-          return `
-            <div class="result-item">
-              <div class="result-url">${item.url}</div>
-              <a href="${item.url}" class="result-title">${item.title}</a>
-              <div class="result-desc">${item.description}</div>
-            </div>
-          `;
-        }).join('');
+        // Step 1: Check if the user typed a website link or just a search word
+        let targetUrl = '';
+        
+        // If it looks like a URL (has a dot, or starts with http)
+        if (query.includes('.') && !query.includes(' ')) {
+          // Make sure it starts with https://
+          if (!query.startsWith('http://') && !query.startsWith('https://')) {
+            targetUrl = 'https://' + query;
+          } else {
+            targetUrl = query;
+          }
+        } else {
+          // If it's a regular word, search it on DuckDuckGo Lite (which is iframe friendly)
+          targetUrl = 'https://lite.duckduckgo.com/lite/?q=' + encodeURIComponent(query);
+        }
+
+        // Step 2: Push the URL through the free CORS proxy to bypass security blocks
+        const proxiedUrl = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
+
+        // Step 3: Load it into the Iframe
+        loading.style.display = 'block';
+        viewer.src = proxiedUrl;
+        
+        // Hide loading text once the iframe finishes loading
+        viewer.onload = function() {
+          loading.style.display = 'none';
+        };
       }
     });
   </script>
+
 </body>
 </html>
