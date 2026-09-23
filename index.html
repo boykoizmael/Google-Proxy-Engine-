@@ -111,27 +111,27 @@
         if (!query) return;
 
         let targetUrl = '';
+        let isUrl = query.includes('.') && !query.includes(' ');
         
-        // Check if the user typed a website link or just a search word
-        if (query.includes('.') && !query.includes(' ')) {
+        // Step 1: Check if the user typed a website link or just a search word
+        if (isUrl) {
           // Format as a proper URL
           if (!query.startsWith('http://') && !query.startsWith('https://')) {
             targetUrl = 'https://' + query;
           } else {
             targetUrl = query;
           }
-          
-          // Push the URL through the CodeTabs proxy to bypass iframe security blocks
-          targetUrl = 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(targetUrl);
-          
         } else {
-          // If it's a regular word, search it on DuckDuckGo Lite (which allows iframes natively)
+          // If it's a regular word, build the DuckDuckGo Lite search URL
           targetUrl = 'https://lite.duckduckgo.com/lite/?q=' + encodeURIComponent(query);
         }
 
-        // Load it into the Iframe
+        // Step 2: Push EVERYTHING through the CodeTabs proxy to bypass all security blocks
+        let finalUrl = 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(targetUrl);
+
+        // Step 3: Load it into the Iframe
         loading.style.display = 'block';
-        viewer.src = targetUrl;
+        viewer.src = finalUrl;
         
         // Hide loading text once the iframe finishes loading
         viewer.onload = function() {
