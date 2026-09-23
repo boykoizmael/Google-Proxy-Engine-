@@ -25,7 +25,7 @@ app.use((req, res, next) => {
 // Serve everything inside your root folder as a direct static path asset
 app.use(express.static(__dirname));
 
-// Dynamic dependency fetch loops
+// Dynamic dependency fetch loops from official CDN blocks
 const CDN = 'https://jsdelivr.net';
 
 app.get('/uv/uv.bundle.js', async (req, res) => {
@@ -43,16 +43,8 @@ app.get('/uv/uv.sw.js', async (req, res) => {
     res.type('application/javascript').send(await src.text());
 });
 
-// REMOVED THE EMBEDDED /service/* ROUTE THAT WAS CAUSING THE "CANNOT GET" BLOCKS
-// Instead, if a user reloads a proxy page directly, it routes them smoothly back to the app frame
-app.use((req, res, next) => {
-    if (req.path.startsWith('/service/')) {
-        res.sendFile(join(__dirname, 'index.html'));
-    } else {
-        next();
-    }
-});
-
+// REMOVED THE EMBEDDED /service/* FALLBACK THAT CAUSED THE DUPLICATION LOOP
+// Your main site dashboard will now load cleanly on root
 app.get('/', (req, res) => {
     res.sendFile(join(__dirname, 'index.html'));
 });
