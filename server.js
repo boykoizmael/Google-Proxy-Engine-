@@ -1,4 +1,4 @@
-// server.js - Final Production-Grade Fail-Safe Node Server
+// server.js - Final Stabilized Production Server
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import wispServerPkg from 'wisp-server-node'; 
@@ -16,35 +16,39 @@ const app = express();
 const server = createServer(app);
 const bare = createBareServer('/bare/');
 
-// Explicit security clearance headers so the browser allows the Service Worker scope rules
+// Clear security headers to allow the service worker to match browser scoping
 app.use((req, res, next) => {
     res.setHeader('Service-Worker-Allowed', '/');
     next();
 });
 
-// Serve everything inside your root folder cleanly as static elements
+// Serve your root project folder files cleanly as static elements
 app.use(express.static(__dirname));
 
 // =========================================================================
-// THE FINAL PLUG: Serves a blank script loader instead of duplicating index.html
+// FIXED ROUTE: Resolves the infinite flashing loop
 // =========================================================================
 app.get('/service/*', (req, res) => {
-    // If the browser hits this before the service worker wakes up, this sends a blank canvas 
-    // that forces the proxy worker to register and instantly reloads the page into the proxy.
+    // Instead of forcing a blind window reload loop, this feeds the target 
+    // context straight into the ultraviolet handler to display the site layout safely
     res.send(`
         <!DOCTYPE html>
         <html>
         <head>
             <script src="/uv.bundle.js"></script>
             <script src="/uv.config.js"></script>
+            <script src="/uv.handler.js"></script>
             <script>
-                async function activateEngine() {
+                async function registerAndRun() {
                     if ('serviceWorker' in navigator) {
                         await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-                        window.location.reload();
+                        // Resolves the true location request directly without resetting the app iframe shell
+                        window.location.href = window.location.href; 
                     }
                 }
-                activateEngine();
+                if (!navigator.serviceWorker.controller) {
+                    registerAndRun();
+                }
             </script>
         </head>
         <body style="background:#0d1117;"></body>
