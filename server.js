@@ -1,4 +1,4 @@
-// server.js - Final Production-Grade Native Proxy Server
+// server.js - Final Stable Server with Security Clearance Headers
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import wispServerPkg from 'wisp-server-node'; 
@@ -16,13 +16,15 @@ const app = express();
 const server = createServer(app);
 const bare = createBareServer('/bare/');
 
-// Set explicit security clearance headers so the browser allows the Service Worker to run
+// =======================================================
+// SECURITY FIX: Explicitly allow Service Worker scoping
+// =======================================================
 app.use((req, res, next) => {
     res.setHeader('Service-Worker-Allowed', '/');
     next();
 });
 
-// Serve everything inside your root folder as a direct static path asset
+// Serve everything inside your root folder as a static asset
 app.use(express.static(__dirname));
 
 // Dynamic dependency fetch loops from official CDN blocks
@@ -43,13 +45,11 @@ app.get('/uv/uv.sw.js', async (req, res) => {
     res.type('application/javascript').send(await src.text());
 });
 
-// REMOVED THE EMBEDDED /service/* FALLBACK THAT CAUSED THE DUPLICATION LOOP
-// Your main site dashboard will now load cleanly on root
 app.get('/', (req, res) => {
     res.sendFile(join(__dirname, 'index.html'));
 });
 
-// Route primary HTTP data arrays
+// Route primary HTTP data arrays through standard Express or Bare engine
 server.on('request', (req, res) => {
     if (bare.shouldRoute(req)) {
         bare.route(req, res);
@@ -58,7 +58,7 @@ server.on('request', (req, res) => {
     }
 });
 
-// WebSocket binding pipeline configurations for heavy multiplayer data games
+// WebSocket binding pipeline configurations for heavy multiplayer games
 const wss = new WebSocketServer({ noServer: true });
 
 server.on('upgrade', (request, socket, head) => {
