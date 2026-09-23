@@ -1,115 +1,182 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShadowSearch - Custom Proxy Engine</title>
-    <style>
-        :root {
-            --bg-color: #0d1117;
-            --panel-color: #161b22;
-            --accent-color: #58a6ff;
-            --text-color: #c9d1d9;
-        }
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color); color: var(--text-color);
-            overflow: hidden; display: flex; flex-direction: column;
-        }
-        header {
-            background-color: var(--panel-color);
-            padding: 10px 20px; display: flex; align-items: center;
-            border-bottom: 1px solid #30363d; gap: 15px; z-index: 10;
-        }
-        .logo { font-weight: bold; color: var(--accent-color); font-size: 1.2rem; cursor: pointer; }
-        .search-container { flex-grow: 1; display: flex; position: relative; }
-        input[type="text"] {
-            width: 100%; padding: 10px 15px; background-color: var(--bg-color);
-            border: 1px solid #30363d; border-radius: 6px; color: #fff; font-size: 0.95rem;
-            outline: none; transition: border-color 0.2s;
-        }
-        input[type="text"]:focus { border-color: var(--accent-color); }
-        button {
-            padding: 10px 20px; background-color: var(--accent-color); color: #fff;
-            border: none; border-radius: 6px; margin-left: 10px; cursor: pointer; font-weight: 600;
-        }
-        button:hover { opacity: 0.9; }
-        .view-window { flex-grow: 1; width: 100%; border: none; background: #fff; }
-        .intro-screen {
-            position: absolute; top: 56px; left: 0; width: 100%; height: calc(100% - 56px);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background-color: var(--bg-color); z-index: 5; transition: opacity 0.3s;
-        }
-        .intro-screen.hidden { opacity: 0; pointer-events: none; }
-        .intro-box { text-align: center; max-width: 500px; padding: 20px; }
-        .intro-box h1 { font-size: 2.5rem; margin-bottom: 10px; color: #fff; }
-    </style>
-    <script src="/uv.bundle.js"></script>
-    <script src="/uv.config.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1117 Search</title>
+  
+  <!-- 1. Load Fuse.js for powerful client-side search algorithms -->
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+  
+  <style>
+    /* 2. Style the 1117 Search Engine */
+    :root {
+      --bg: #ffffff;
+      --text: #202124;
+      --primary: #1a73e8;
+      --border: #dfe1e5;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 15vh;
+      margin: 0;
+    }
+    .brand {
+      font-size: 5rem;
+      font-weight: 800;
+      letter-spacing: -3px;
+      margin-bottom: 30px;
+    }
+    .brand span:nth-child(1) { color: #4285f4; }
+    .brand span:nth-child(2) { color: #ea4335; }
+    .brand span:nth-child(3) { color: #fbbc05; }
+    .brand span:nth-child(4) { color: #34a853; }
+    
+    .search-container {
+      width: 100%;
+      max-width: 584px;
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+    .search-box {
+      width: 100%;
+      padding: 14px 24px;
+      font-size: 1.1rem;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      outline: none;
+      box-shadow: 0 1px 6px rgba(32,33,36,0.1);
+      transition: box-shadow 0.2s, border 0.2s;
+    }
+    .search-box:focus {
+      box-shadow: 0 1px 8px rgba(32,33,36,0.2);
+      border-color: rgba(223,225,229,0);
+    }
+    
+    #results {
+      margin-top: 40px;
+      width: 100%;
+      max-width: 650px;
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+    .result-item {
+      margin-bottom: 25px;
+    }
+    .result-title {
+      color: var(--primary);
+      font-size: 1.25rem;
+      text-decoration: none;
+      display: block;
+      margin-bottom: 3px;
+    }
+    .result-title:hover {
+      text-decoration: underline;
+    }
+    .result-url {
+      color: #202124;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+    .result-desc {
+      font-size: 0.9rem;
+      color: #4d5156;
+      line-height: 1.58;
+    }
+    .no-results {
+      color: #5f6368;
+      font-style: italic;
+    }
+  </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo" onclick="goHome()">ShadowSearch</div>
-        <div class="search-container">
-            <input type="text" id="omni-bar" placeholder="Enter a URL or search anonymously..." autocomplete="off">
-            <button onclick="handleSearch()">Go</button>
-        </div>
-    </header>
+  <!-- The 1117 Logo -->
+  <div class="brand">
+    <span>1</span><span>1</span><span>1</span><span>7</span>
+  </div>
+  
+  <!-- The Search Input Box -->
+  <div class="search-container">
+    <input type="text" id="searchInput" class="search-box" placeholder="Search the 1117 database..." autocomplete="off">
+  </div>
 
-    <div class="intro-screen" id="intro-screen">
-        <div class="intro-box">
-            <h1>ShadowSearch</h1>
-            <p>Everything runs inside. Unrestricted, fast, and completely isolated via custom network mapping.</p>
-        </div>
-    </div>
+  <!-- Where results will appear -->
+  <div id="results"></div>
 
-    <!-- FIXED: Removed restrictive sandbox attributes that caused the browser engine to crash-loop -->
-    <iframe class="view-window" id="proxy-viewport"></iframe>
+  <script>
+    // 3. Define the Database (Your Index)
+    // You can add as many items here as you want.
+    const database = [
+      {
+        title: "How to Build a Client-Side Search Engine",
+        url: "https://1117.local/guides/client-search",
+        description: "Learn how to use JavaScript and JSON to create an in-browser search engine that requires no backend database."
+      },
+      {
+        title: "History of 1117",
+        url: "https://1117.local/about",
+        description: "The 1117 search engine was created as a fully contained, lightning-fast tool for looking up local data."
+      },
+      {
+        title: "JavaScript Variables and Functions",
+        url: "https://1117.local/code/js",
+        description: "A deep dive into declaring variables, writing functions, and manipulating the DOM to build interactive web apps."
+      },
+      {
+        title: "Designing Search Interfaces",
+        url: "https://1117.local/design/ui",
+        description: "Best practices for spacing, typography, and shadow effects when building a clean search engine homepage."
+      }
+    ];
 
-    <script>
-        async function registerEngineWorker() {
-            if ('serviceWorker' in navigator) {
-                try {
-                    await navigator.serviceWorker.register('/sw.js', { scope: __uv$config.prefix });
-                    console.log('Proxy connection engine active.');
-                } catch (err) {
-                    console.error('Service worker initialization failure:', err);
-                }
-            }
-        }
+    // 4. Configure the Search Engine Logic
+    const fuseOptions = {
+      keys: ['title', 'description'], // Tell the engine to look in both titles and descriptions
+      includeScore: true,             // Rank the best matches at the top
+      threshold: 0.3                  // Fuzziness level: 0.0 requires an exact match, 1.0 matches anything
+    };
+    
+    // Initialize the engine with your database
+    const engine = new Fuse(database, fuseOptions);
 
-        function handleSearch() {
-            const input = document.getElementById('omni-bar').value.trim();
-            if (!input) return;
+    // 5. Connect the User Interface to the Engine
+    const searchInput = document.getElementById('searchInput');
+    const resultsContainer = document.getElementById('results');
 
-            let targetUrl = input;
-            const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i;
+    searchInput.addEventListener('input', function(e) {
+      const query = e.target.value;
+      
+      // If the search bar is empty, clear the results
+      if (query.trim() === '') {
+        resultsContainer.innerHTML = '';
+        return;
+      }
 
-            if (!urlPattern.test(input)) {
-                targetUrl = "https://duckduckgo.com" + encodeURIComponent(input);
-            } else if (!/^https?:\/\//i.test(input)) {
-                targetUrl = 'https://' + input;
-            }
-
-            document.getElementById('intro-screen').classList.add('hidden');
-            const viewport = document.getElementById('proxy-viewport');
-            
-            viewport.src = window.location.origin + __uv$config.prefix + __uv$config.encodeUrl(targetUrl);
-        }
-
-        function goHome() {
-            document.getElementById('intro-screen').classList.remove('hidden');
-            document.getElementById('proxy-viewport').src = 'about:blank';
-            document.getElementById('omni-bar').value = '';
-        }
-
-        document.getElementById('omni-bar').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleSearch();
-        });
-
-        registerEngineWorker();
-    </script>
+      // Ask the engine to find matches
+      const results = engine.search(query);
+      
+      // Render the results to the page
+      if (results.length === 0) {
+        resultsContainer.innerHTML = '<div class="no-results">Your search did not match any documents in 1117.</div>';
+      } else {
+        resultsContainer.innerHTML = results.map(result => {
+          const item = result.item; // Extract the matched data
+          return `
+            <div class="result-item">
+              <div class="result-url">${item.url}</div>
+              <a href="${item.url}" class="result-title">${item.title}</a>
+              <div class="result-desc">${item.description}</div>
+            </div>
+          `;
+        }).join('');
+      }
+    });
+  </script>
 </body>
 </html>
