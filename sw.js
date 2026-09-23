@@ -1,7 +1,6 @@
-// sw.js - Fixed Directory Paths
-importScripts('/uv/uv.bundle.js');
-importScripts('/uv/uv.config.js');
-importScripts('/uv/uv.sw.js');
+importScripts('/uv.bundle.js');
+importScripts('/uv.config.js');
+importScripts('/uv.sw.js');
 
 const uv = new UVServiceWorker();
 
