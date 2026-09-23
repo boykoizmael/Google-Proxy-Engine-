@@ -16,7 +16,7 @@ const app = express();
 const server = createServer(app);
 const bare = createBareServer('/bare/');
 
-// Set explicit security clearance headers so the browser allows the Service Worker to run
+// Explicit security clearance headers so the browser allows the Service Worker scope rules
 app.use((req, res, next) => {
     res.setHeader('Service-Worker-Allowed', '/');
     next();
@@ -24,18 +24,6 @@ app.use((req, res, next) => {
 
 // Serve everything inside your root folder cleanly as static elements
 app.use(express.static(__dirname));
-
-// =========================================================================
-// FIXED FALLBACK: Direct path catch-all to eliminate "Cannot GET" errors
-// =========================================================================
-app.use((req, res, next) => {
-    if (req.path.startsWith('/service/')) {
-        // Keeps the route open and serves the app container layout instead of crashing
-        res.sendFile(join(__dirname, 'index.html'));
-    } else {
-        next();
-    }
-});
 
 app.get('/', (req, res) => {
     res.sendFile(join(__dirname, 'index.html'));
