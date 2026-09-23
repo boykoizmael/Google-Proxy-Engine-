@@ -1,0 +1,15 @@
+{
+  "name": "shadowsearch-engine",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "High performance customized internal proxy search engine platform structure.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.16.0",
+    "wisp-server-node": "^1.1.2"
+  }
+}
