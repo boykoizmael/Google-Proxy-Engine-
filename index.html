@@ -68,13 +68,14 @@
     <iframe class="view-window" id="proxy-viewport"></iframe>
 
     <script>
-        async function initProxyEngine() {
+        // Force register worker onto root scope to clear out "Cannot GET" errors
+        async function registerEngineWorker() {
             if ('serviceWorker' in navigator) {
                 try {
-                    await navigator.serviceWorker.register('/sw.js', { scope: __uv$config.prefix });
-                    console.log('Gateway communication synced.');
+                    await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+                    console.log('Proxy connection engine active.');
                 } catch (err) {
-                    console.error('Core component alignment failed:', err);
+                    console.error('Service worker registration failure:', err);
                 }
             }
         }
@@ -95,6 +96,7 @@
             document.getElementById('intro-screen').classList.add('hidden');
             const viewport = document.getElementById('proxy-viewport');
             
+            // Map configuration routing variables explicitly
             viewport.src = window.location.origin + __uv$config.prefix + __uv$config.encodeUrl(targetUrl);
         }
 
@@ -108,7 +110,7 @@
             if (e.key === 'Enter') handleSearch();
         });
 
-        initProxyEngine();
+        registerEngineWorker();
     </script>
 </body>
 </html>
