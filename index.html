@@ -45,9 +45,9 @@
         .intro-box { text-align: center; max-width: 500px; padding: 20px; }
         .intro-box h1 { font-size: 2.5rem; margin-bottom: 10px; color: #fff; }
     </style>
-    <!-- Load official Ultraviolet bundling scripts to fix heavy sites like arras.io -->
-    <script src="https://jsdelivr.net"></script>
-    <script src="https://jsdelivr.net"></script>
+    <!-- Load local rewriter configurations safely -->
+    <script src="/uv.bundle.js"></script>
+    <script src="/uv.config.js"></script>
 </head>
 <body>
 
@@ -69,11 +69,10 @@
     <iframe class="view-window" id="proxy-viewport" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
 
     <script>
-        // Automatically initialize Ultraviolet when the window wakes up
         window.addEventListener('load', async () => {
             if ('serviceWorker' in navigator) {
                 try {
-                    // Register the unblocking bundle service worker script mapping
+                    // Start worker using custom configuration prefix properties
                     await navigator.serviceWorker.register('/sw.js', { scope: __uv$config.prefix });
                     console.log('Proxy connection engine active.');
                 } catch (err) {
@@ -98,7 +97,7 @@
             document.getElementById('intro-screen').classList.add('hidden');
             const viewport = document.getElementById('proxy-viewport');
             
-            // Route target through the Ultraviolet auto-rewriter path
+            // Map location with custom local runtime configs
             viewport.src = window.location.origin + __uv$config.prefix + __uv$config.encodeUrl(targetUrl);
         }
 
