@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShadowSearch - Custom Proxy Engine</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --panel-color: #161b22;
+            --accent-color: #58a6ff;
+            --text-color: #c9d1d9;
+        }
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color); color: var(--text-color);
+            overflow: hidden; display: flex; flex-direction: column;
+        }
+        header {
+            background-color: var(--panel-color);
+            padding: 10px 20px; display: flex; align-items: center;
+            border-bottom: 1px solid #30363d; gap: 15px; z-index: 10;
+        }
+        .logo {
+            font-weight: bold; color: var(--accent-color); font-size: 1.2rem; cursor: pointer;
+        }
+        .search-container {
+            flex-grow: 1; display: flex; position: relative;
+        }
+        input[type="text"] {
+            width: 100%; padding: 10px 15px; background-color: var(--bg-color);
+            border: 1px solid #30363d; border-radius: 6px; color: #fff; font-size: 0.95rem;
+            outline: none; transition: border-color 0.2s;
+        }
+        input[type="text"]:focus { border-color: var(--accent-color); }
+        button {
+            padding: 10px 20px; background-color: var(--accent-color); color: #fff;
+            border: none; border-radius: 6px; margin-left: 10px; cursor: pointer; font-weight: 600;
+        }
+        button:hover { opacity: 0.9; }
+        .view-window {
+            flex-grow: 1; width: 100%; border: none; background: #fff;
+        }
+        .intro-screen {
+            position: absolute; top: 56px; left: 0; width: 100%; height: calc(100% - 56px);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background-color: var(--bg-color); z-index: 5; transition: opacity 0.3s;
+        }
+        .intro-screen.hidden { opacity: 0; pointer-events: none; }
+        .intro-box { text-align: center; max-width: 500px; padding: 20px; }
+        .intro-box h1 { font-size: 2.5rem; margin-bottom: 10px; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo" onclick="goHome()">ShadowSearch</div>
+        <div class="search-container">
+            <input type="text" id="omni-bar" placeholder="Enter a URL or search anonymously..." autocomplete="off">
+            <button onclick="handleSearch()">Go</button>
+        </div>
+    </header>
+
+    <!-- Splash homepage inside the search engine -->
+    <div class="intro-screen" id="intro-screen">
+        <div class="intro-box">
+            <h1>ShadowSearch</h1>
+            <p>Everything runs inside. Unrestricted, fast, and completely isolated via custom WISP mapping.</p>
+        </div>
+    </div>
+
+    <!-- The isolated viewing pipeline container -->
+    <iframe class="view-window" id="proxy-viewport" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
+
+    <!-- Ephemeral client routing logic -->
+    <script>
+        // REPLACE WITH YOUR DEPLOYED BACKEND RELAY URL
+        const WISP_RELAY_URL = "wss://your-custom-relay-app.koyeb.app/wisp/"; 
+
+        async function initProxyEngine() {
+            if ('serviceWorker' in navigator) {
+                try {
+                    // Registering the background hook configuration mapping
+                    const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+                    console.log('Proxy routing engine active:', registration.scope);
+                    
+                    // Propagate the backend WISP relay parameters to the configuration worker
+                    if (navigator.serviceWorker.controller) {
+                        navigator.serviceWorker.controller.postMessage({
+                            type: 'SET_RELAY',
+                            url: WISP_RELAY_URL
+                        });
+                    }
+                } catch (err) {
+                    console.error('Engine initialization failed:', err);
+                }
+            }
+        }
+
+        function handleSearch() {
+            const input = document.getElementById('omni-bar').value.trim();
+            if (!input) return;
+
+            let targetUrl = input;
+            const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?\$/;
+
+            // If the query is not a direct URL, compile an anonymous search request
+            if (!urlPattern.test(input)) {
+                targetUrl = `https://duckduckgo.com{encodeURIComponent(input)}`;
+            } else if (!/^https?:\/\//i.test(input)) {
+                targetUrl = 'https://' + input;
+            }
+
+            // Collapse the home screen overlay
+            document.getElementById('intro-screen').classList.add('hidden');
+
+            // Route the targeted request directly inside the processing pipeline prefix
+            const viewport = document.getElementById('proxy-viewport');
+            viewport.src = window.location.origin + '/service/' + btoa(targetUrl).replace(/\//g, '_');
+        }
+
+        function goHome() {
+            document.getElementById('intro-screen').classList.remove('hidden');
+            document.getElementById('proxy-viewport').src = 'about:blank';
+            document.getElementById('omni-bar').value = '';
+        }
+
+        document.getElementById('omni-bar').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSearch();
+        });
+
+        window.addEventListener('load', initProxyEngine);
+    </script>
+</body>
+</html>
