@@ -1,7 +1,7 @@
 // uv.config.js - Custom Configuration Map
 self.__uv$config = {
     prefix: '/service/',
-    bare: 'https://workers.dev', // Public fallback bare instance to decode game engines
+    bare: '/bare/', // FIXED: Routes traffic directly through your own hosted app server
     encodeUrl: function(url) {
         if (!url) return url;
         return encodeURIComponent(url);
