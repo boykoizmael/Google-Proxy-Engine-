@@ -45,7 +45,7 @@
         .intro-box { text-align: center; max-width: 500px; padding: 20px; }
         .intro-box h1 { font-size: 2.5rem; margin-bottom: 10px; color: #fff; }
     </style>
-    <!-- Load local rewriter configurations safely -->
+    <!-- Load required local rewriter configurations safely -->
     <script src="/uv.bundle.js"></script>
     <script src="/uv.config.js"></script>
 </head>
@@ -66,20 +66,20 @@
         </div>
     </div>
 
-    <iframe class="view-window" id="proxy-viewport" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
+    <iframe class="view-window" id="proxy-viewport"></iframe>
 
     <script>
-        window.addEventListener('load', async () => {
+        // Start the browser tracking worker using local properties configuration templates
+        async function registerEngineWorker() {
             if ('serviceWorker' in navigator) {
                 try {
-                    // Start worker using custom configuration prefix properties
                     await navigator.serviceWorker.register('/sw.js', { scope: __uv$config.prefix });
                     console.log('Proxy connection engine active.');
                 } catch (err) {
                     console.error('Service worker initialization failure:', err);
                 }
             }
-        });
+        }
 
         function handleSearch() {
             const input = document.getElementById('omni-bar').value.trim();
@@ -97,7 +97,7 @@
             document.getElementById('intro-screen').classList.add('hidden');
             const viewport = document.getElementById('proxy-viewport');
             
-            // Map location with custom local runtime configs
+            // Map configuration routing variables explicitly
             viewport.src = window.location.origin + __uv$config.prefix + __uv$config.encodeUrl(targetUrl);
         }
 
@@ -110,6 +110,9 @@
         document.getElementById('omni-bar').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleSearch();
         });
+
+        // Initialize runtime script operations
+        registerEngineWorker();
     </script>
 </body>
 </html>
