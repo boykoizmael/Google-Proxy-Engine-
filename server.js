@@ -1,10 +1,13 @@
-// server.js - High Performance WISP Relay Backend
+// server.js - High Performance WISP Relay Backend (Fixed ESM Imports)
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
-import { wispServer } from 'wisp-server-node'; 
+import wispServerPkg from 'wisp-server-node'; // Import the full CommonJS package object
 import express from 'express';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+
+// Extract the required server handler from the package default export object
+const wispServer = wispServerPkg.wispServer || wispServerPkg;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
