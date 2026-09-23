@@ -1,4 +1,4 @@
-// server.js - Stable Production-Grade Native Proxy Server
+// server.js - Final Production-Grade Fail-Safe Node Server
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import wispServerPkg from 'wisp-server-node'; 
@@ -16,18 +16,32 @@ const app = express();
 const server = createServer(app);
 const bare = createBareServer('/bare/');
 
+// Set explicit security clearance headers so the browser allows the Service Worker to run
 app.use((req, res, next) => {
     res.setHeader('Service-Worker-Allowed', '/');
     next();
 });
 
-// Serve everything natively inside the root workspace folder
+// Serve everything inside your root folder cleanly as static elements
 app.use(express.static(__dirname));
+
+// =========================================================================
+// FIXED FALLBACK: Direct path catch-all to eliminate "Cannot GET" errors
+// =========================================================================
+app.use((req, res, next) => {
+    if (req.path.startsWith('/service/')) {
+        // Keeps the route open and serves the app container layout instead of crashing
+        res.sendFile(join(__dirname, 'index.html'));
+    } else {
+        next();
+    }
+});
 
 app.get('/', (req, res) => {
     res.sendFile(join(__dirname, 'index.html'));
 });
 
+// Route active live HTTP web traffic requests through your data channel
 server.on('request', (req, res) => {
     if (bare.shouldRoute(req)) {
         bare.route(req, res);
@@ -36,6 +50,7 @@ server.on('request', (req, res) => {
     }
 });
 
+// High-performance WebSocket proxy socket mapping pipeline for real-time multiplayer links
 const wss = new WebSocketServer({ noServer: true });
 
 server.on('upgrade', (request, socket, head) => {
@@ -52,5 +67,5 @@ server.on('upgrade', (request, socket, head) => {
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
-    console.log(`ShadowSearch active on Port: ${PORT}`);
+    console.log(`ShadowSearch running stable on Port: ${PORT}`);
 });
