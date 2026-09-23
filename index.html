@@ -94,7 +94,7 @@
     </div>
   </div>
 
-  <div id="loading">Loading proxy...</div>
+  <div id="loading">Loading via proxy...</div>
 
   <!-- The Window where websites will load -->
   <iframe id="viewer" src="about:blank"></iframe>
@@ -110,28 +110,28 @@
         let query = searchInput.value.trim();
         if (!query) return;
 
-        // Step 1: Check if the user typed a website link or just a search word
         let targetUrl = '';
         
-        // If it looks like a URL (has a dot, or starts with http)
+        // Check if the user typed a website link or just a search word
         if (query.includes('.') && !query.includes(' ')) {
-          // Make sure it starts with https://
+          // Format as a proper URL
           if (!query.startsWith('http://') && !query.startsWith('https://')) {
             targetUrl = 'https://' + query;
           } else {
             targetUrl = query;
           }
+          
+          // Push the URL through the CodeTabs proxy to bypass iframe security blocks
+          targetUrl = 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(targetUrl);
+          
         } else {
-          // If it's a regular word, search it on DuckDuckGo Lite (which is iframe friendly)
+          // If it's a regular word, search it on DuckDuckGo Lite (which allows iframes natively)
           targetUrl = 'https://lite.duckduckgo.com/lite/?q=' + encodeURIComponent(query);
         }
 
-        // Step 2: Push the URL through the free CORS proxy to bypass security blocks
-        const proxiedUrl = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
-
-        // Step 3: Load it into the Iframe
+        // Load it into the Iframe
         loading.style.display = 'block';
-        viewer.src = proxiedUrl;
+        viewer.src = targetUrl;
         
         // Hide loading text once the iframe finishes loading
         viewer.onload = function() {
