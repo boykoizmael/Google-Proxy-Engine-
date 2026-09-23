@@ -1,4 +1,4 @@
-// server.js - Final Stabilized Production Server
+// server.js - Stable Production-Grade Native Proxy Server
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import wispServerPkg from 'wisp-server-node'; 
@@ -16,21 +16,14 @@ const app = express();
 const server = createServer(app);
 const bare = createBareServer('/bare/');
 
-// Clear security headers to allow the service worker to match browser scoping
-app.use((req, res, next) => {
-    res.setHeader('Service-Worker-Allowed', '/');
-    next();
-});
-
-// Serve your root project folder files cleanly as static elements
+// Serve everything natively inside the root workspace folder
 app.use(express.static(__dirname));
 
 // =========================================================================
-// FIXED ROUTE: Resolves the infinite flashing loop
+// FIXED ROUTE: Direct Fallback to process localized configuration paths
 // =========================================================================
 app.get('/service/*', (req, res) => {
-    // Instead of forcing a blind window reload loop, this feeds the target 
-    // context straight into the ultraviolet handler to display the site layout safely
+    // Serves an aligned loader to trigger registration scope clearance cleanly
     res.send(`
         <!DOCTYPE html>
         <html>
@@ -41,9 +34,8 @@ app.get('/service/*', (req, res) => {
             <script>
                 async function registerAndRun() {
                     if ('serviceWorker' in navigator) {
-                        await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-                        // Resolves the true location request directly without resetting the app iframe shell
-                        window.location.href = window.location.href; 
+                        await navigator.serviceWorker.register('/sw.js', { scope: __uv$config.prefix });
+                        window.location.reload(); 
                     }
                 }
                 if (!navigator.serviceWorker.controller) {
@@ -60,7 +52,7 @@ app.get('/', (req, res) => {
     res.sendFile(join(__dirname, 'index.html'));
 });
 
-// Route active live HTTP web traffic requests through your data channel
+// Route primary HTTP data arrays through standard Express or Bare engine
 server.on('request', (req, res) => {
     if (bare.shouldRoute(req)) {
         bare.route(req, res);
@@ -69,7 +61,7 @@ server.on('request', (req, res) => {
     }
 });
 
-// High-performance WebSocket proxy socket mapping pipeline for real-time multiplayer links
+// WebSocket binding pipeline configurations for heavy multiplayer games
 const wss = new WebSocketServer({ noServer: true });
 
 server.on('upgrade', (request, socket, head) => {
@@ -86,5 +78,5 @@ server.on('upgrade', (request, socket, head) => {
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
-    console.log(`ShadowSearch running stable on Port: ${PORT}`);
+    console.log(`ShadowSearch active on Port: ${PORT}`);
 });
