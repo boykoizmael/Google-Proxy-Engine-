@@ -45,7 +45,6 @@
         .intro-box { text-align: center; max-width: 500px; padding: 20px; }
         .intro-box h1 { font-size: 2.5rem; margin-bottom: 10px; color: #fff; }
     </style>
-    <!-- Load local unblocking rewriter configurations -->
     <script src="/uv.bundle.js"></script>
     <script src="/uv.config.js"></script>
 </head>
@@ -66,14 +65,13 @@
         </div>
     </div>
 
+    <!-- FIXED: Removed restrictive sandbox attributes that caused the browser engine to crash-loop -->
     <iframe class="view-window" id="proxy-viewport"></iframe>
 
     <script>
-        // Start the browser tracking worker matched perfectly to the configuration path
         async function registerEngineWorker() {
             if ('serviceWorker' in navigator) {
                 try {
-                    // FIXED: Scope updated to align directly with your uv.config prefix module 
                     await navigator.serviceWorker.register('/sw.js', { scope: __uv$config.prefix });
                     console.log('Proxy connection engine active.');
                 } catch (err) {
@@ -98,7 +96,6 @@
             document.getElementById('intro-screen').classList.add('hidden');
             const viewport = document.getElementById('proxy-viewport');
             
-            // Map configuration routing variables explicitly
             viewport.src = window.location.origin + __uv$config.prefix + __uv$config.encodeUrl(targetUrl);
         }
 
@@ -112,7 +109,6 @@
             if (e.key === 'Enter') handleSearch();
         });
 
-        // Initialize runtime script operations
         registerEngineWorker();
     </script>
 </body>
