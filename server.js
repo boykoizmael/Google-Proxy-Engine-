@@ -1,11 +1,10 @@
-// server.js - High Performance WISP Relay Backend (Fixed Wildcard Route Mapping)
+// server.js - High Performance WISP Relay Backend (Fixed for Node v24 Native Fetch)
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import wispServerPkg from 'wisp-server-node'; 
 import express from 'express';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import fetch from 'node-fetch';
 
 const wispServer = wispServerPkg.wispServer || wispServerPkg;
 
@@ -23,7 +22,7 @@ app.get('/', (req, res) => {
 });
 
 // ==================================================
-// CORRECTED: Wildcard Catch-All Express Proxy Route
+// Wildcard Catch-All Express Proxy Route
 // ==================================================
 app.get('/service/*', async (req, res) => {
     try {
@@ -37,7 +36,7 @@ app.get('/service/*', async (req, res) => {
         const base64Clean = encodedTarget.replace(/_/g, '/');
         const targetUrl = Buffer.from(base64Clean, 'base64').toString('utf-8');
 
-        // Fetch target website parameters on behalf of the application browser window
+        // Using Node v24 native global fetch engine
         const response = await fetch(targetUrl, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
