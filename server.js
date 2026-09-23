@@ -1,4 +1,4 @@
-// server.js - Stable Traffic Pipeline Backend with File Routers
+// server.js - Stable Backend Matrix
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import wispServerPkg from 'wisp-server-node'; 
@@ -14,11 +14,10 @@ const __dirname = dirname(__filename);
 const app = express();
 const server = createServer(app);
 
+// Serve your root project folder files cleanly
 app.use(express.static(__dirname));
 
-// ==========================================
-// Host the Core Ultraviolet Dependency Files
-// ==========================================
+// Host Core Ultraviolet dependency file structures locally
 app.get('/uv.bundle.js', async (req, res) => {
     const src = await fetch('https://jsdelivr.net');
     res.type('application/javascript').send(await src.text());
@@ -29,19 +28,11 @@ app.get('/uv.handler.js', async (req, res) => {
     res.type('application/javascript').send(await src.text());
 });
 
-// ==========================================================
-// FIXED: Catch-All Proxy Router to resolve "Cannot GET /service/"
-// ==========================================================
-app.get('/service/*', (req, res) => {
-    // Allows Ultraviolet to process the request context dynamically in the browser
-    res.sendFile(join(__dirname, 'index.html'));
-});
-
 app.get('/', (req, res) => {
     res.sendFile(join(__dirname, 'index.html'));
 });
 
-// Configure the live high-performance WebSocket proxy socket mapping layer
+// Configure the high-performance WebSocket proxy socket mapping pipeline
 const wss = new WebSocketServer({ noServer: true });
 
 server.on('upgrade', (request, socket, head) => {
